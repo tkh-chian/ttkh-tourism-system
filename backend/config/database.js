@@ -11,7 +11,7 @@ if (isRender) {
     dialect: 'sqlite',
     storage: path.join(__dirname, '../database.sqlite'),
     logging: false,
-    timezone: '+07:00',
+    // 移除了timezone设置，因为SQLite不支持
     define: {
       timestamps: true,
       underscored: false,
