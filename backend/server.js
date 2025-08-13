@@ -7,9 +7,10 @@ const { initializeModels } = require('./models');
 
 // 导入路由
 const authRoutes = require('./routes/auth');
-const userRoutes = require('./routes/auth'); // 修改为auth路由
+const userRoutes = require('./routes/users');
 const productRoutes = require('./routes/products');
 const orderRoutes = require('./routes/orders');
+const priceScheduleRoutes = require('./routes/price-schedules');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -60,7 +61,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
-// 价格日程路由已在产品路由中定义，无需单独注册
+app.use('/api/price-schedules', priceScheduleRoutes);
 
 // 添加初始化和创建测试用户的路由
 app.get('/init', async (req, res) => {
