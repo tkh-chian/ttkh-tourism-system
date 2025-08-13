@@ -7,7 +7,7 @@ const { initializeModels } = require('./models');
 
 // 导入路由
 const authRoutes = require('./routes/auth');
-const userRoutes = require('./routes/users');
+const userRoutes = require('./routes/auth'); // 修改为auth路由
 const productRoutes = require('./routes/products');
 const orderRoutes = require('./routes/orders');
 const priceScheduleRoutes = require('./routes/price-schedules');
