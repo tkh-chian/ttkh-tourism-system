@@ -1,0 +1,58 @@
+const { DataTypes } = require('sequelize');
+
+module.exports = (sequelize) => {
+  const PriceSchedule = sequelize.define('PriceSchedule', {
+    id: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true
+    },
+    product_id: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: {
+        model: 'products',
+        key: 'id'
+      }
+    },
+    date: {
+      type: DataTypes.DATEONLY,
+      allowNull: false,
+      field: 'travel_date'
+    },
+    price: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: false
+    },
+    total_stock: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
+    is_available: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true
+    }
+  }, {
+    tableName: 'price_schedules',
+    timestamps: true,
+    indexes: [
+      {
+        unique: true,
+        fields: ['product_id', 'travel_date']
+      }
+    ]
+  });
+
+  // toJSON 映射：将 date 字段输出为 travel_date
+  PriceSchedule.prototype.toJSON = function() {
+    const values = Object.assign({}, this.get());
+    if (values.date !== undefined) {
+      values.travel_date = values.date;
+      delete values.date;
+    }
+    return values;
+  };
+
+  return PriceSchedule;
+};

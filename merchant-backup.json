@@ -1,0 +1,20 @@
+{
+  "timestamp": "2025-08-10T06:21:51.705Z",
+  "rows": [
+    {
+      "id": "80db146d-d1c3-4d88-b255-2894214abe12",
+      "username": "测试商家",
+      "email": "merchant@test.com",
+      "password": "$2b$10$/rbJcZp6xVH/A9zG2HLW9ulP7fmY944pD6b3vywXwLsEr1ff3gEDm",
+      "role": "merchant",
+      "status": "approved",
+      "company_name": null,
+      "contact_person": null,
+      "phone": null,
+      "address": null,
+      "rejection_reason": null,
+      "createdAt": "2025-08-09T23:01:33.000Z",
+      "updatedAt": "2025-08-09T23:01:33.000Z"
+    }
+  ]
+}

@@ -1,0 +1,509 @@
+const { User, Product, Order, PriceSchedule } = require('../models');
+
+// 创建订单
+const createOrder = async (req, res) => {
+  try {
+    const {
+      product_id,
+      travel_date,
+      adults,
+      children_no_bed,
+      total_price,
+      customer_name,
+      notes
+    } = req.body;
+
+    if (!product_id || !travel_date || !adults || !total_price || !customer_name) {
+      return res.status(400).json({
+        success: false,
+        message: '产品ID、出行日期、成人数量、总金额和客户姓名为必填项'
+      });
+    }
+
+    const product = await Product.findByPk(product_id);
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: '产品不存在'
+      });
+    }
+
+    // 检查并更新库存
+    const schedule = await PriceSchedule.findOne({
+      where: {
+        product_id,
+        travel_date: new Date(travel_date).toISOString().split('T')[0]
+      }
+    });
+
+    if (!schedule) {
+      return res.status(400).json({
+        success: false,
+        message: '所选日期没有可用库存'
+      });
+    }
+
+    if (schedule.available_stock < adults) {
+      return res.status(400).json({
+        success: false,
+        message: '库存不足，当前可用库存: ' + schedule.available_stock
+      });
+    }
+
+    // 更新库存
+    await schedule.update({
+      available_stock: schedule.available_stock - adults
+    });
+
+    // 生成唯一订单编号: TTK-时间戳-随机字符串
+    const timestamp = Date.now();
+    const randomStr = Math.random().toString(36).substr(2, 4).toUpperCase();
+    let orderNumber = `TTK${timestamp}${randomStr}`;
+
+    // 验证唯一性并带重试机制
+    const maxRetries = 3;
+    let retryCount = 0;
+    let isUnique = false;
+
+    while (!isUnique && retryCount < maxRetries) {
+      const existingOrder = await Order.findOne({ where: { order_number: orderNumber } });
+      if (existingOrder) {
+        retryCount++;
+        const newRandomStr = Math.random().toString(36).substr(2, 4).toUpperCase();
+        orderNumber = `TTK${timestamp}${newRandomStr}`;
+      } else {
+        isUnique = true;
+      }
+    }
+
+    if (!isUnique) {
+      throw new Error('无法生成唯一订单编号，请稍后重试');
+    }
+
+    const order = await Order.create({
+      order_number: orderNumber,
+      user_id: req.user.id,
+      product_id,
+      travel_date,
+      adult_count: adults,
+      child_count: children_no_bed,
+      total_amount: total_price,
+      customer_info: { customer_name },
+      notes,
+      status: 'pending'
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: '订单创建成功',
+      data: {
+        order: {
+          id: order.id,
+          order_number: order.order_number,
+          user_id: order.user_id,
+          product_id: order.product_id,
+          travel_date: order.travel_date,
+          adult_count: order.adult_count,
+          child_count: order.child_count,
+          total_amount: order.total_amount,
+          customer_info: order.customer_info,
+          status: order.status,
+          createdAt: order.createdAt
+        },
+        orderId: order.id,
+        orderNumber: order.order_number
+      }
+    });
+  } catch (error) {
+    console.error('创建订单错误:', error);
+    return res.status(500).json({
+      success: false,
+      message: '创建订单失败',
+      error: error.message
+    });
+  }
+};
+
+// 获取订单列表
+const getOrders = async (req, res) => {
+  try {
+    const { page = 1, limit = 10, status } = req.query;
+    const offset = (page - 1) * limit;
+    const whereClause = {};
+
+    if (req.user.role === 'customer' || req.user.role === 'user') {
+      whereClause.user_id = req.user.id;
+    } else if (req.user.role === 'merchant') {
+      const merchantProducts = await Product.findAll({
+        where: { merchant_id: req.user.id },
+        attributes: ['id']
+      });
+      const productIds = merchantProducts.map(p => p.id);
+      whereClause.product_id = { [Order.sequelize.Sequelize.Op.in]: productIds };
+    }
+    // 管理员可以看到所有订单，不添加额外的where条件
+
+    if (status) {
+      whereClause.status = status;
+    }
+
+    const { count, rows } = await Order.findAndCountAll({
+      where: whereClause,
+      include: [
+        { model: Product, as: 'product', attributes: ['id', 'name'] },
+        { model: User, as: 'user', attributes: ['id', 'username'] }
+      ],
+      limit: parseInt(limit),
+      offset: parseInt(offset),
+      order: [['createdAt', 'DESC']]
+    });
+
+    const orders = rows.map(order => ({
+      orderId: order.id,
+      orderNumber: order.order_number,
+      productId: order.product.id,
+      product_title: order.product.name,
+      travel_date: order.travel_date,
+      adults: order.adult_count,
+      children_no_bed: order.child_count,
+      total_price: order.total_amount,
+      customer_name: order.customer_info?.customer_name || order.user.username,
+      status: order.status,
+      created_at: order.createdAt
+    }));
+
+    return res.json({
+      success: true,
+      data: {
+        orders,
+        pagination: {
+          total: count,
+          page: parseInt(page),
+          limit: parseInt(limit),
+          totalPages: Math.ceil(count / limit)
+        }
+      }
+    });
+  } catch (error) {
+    console.error('获取订单列表错误:', error);
+    return res.status(500).json({
+      success: false,
+      message: '获取订单列表失败',
+      error: error.message
+    });
+  }
+};
+
+// 获取订单详情
+const getOrderById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const order = await Order.findByPk(id, {
+      include: [
+        {
+          model: Product,
+          as: 'product',
+          include: [
+            {
+              model: User,
+              as: 'merchant',
+              attributes: ['id', 'username', 'company_name', 'contact_person']
+            }
+          ]
+        },
+        {
+          model: User,
+          as: 'user',
+          attributes: ['id', 'username', 'email', 'phone']
+        }
+      ]
+    });
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: '订单不存在'
+      });
+    }
+
+    if (req.user.role === 'customer' && order.user_id !== req.user.id) {
+      return res.status(403).json({
+        success: false,
+        message: '无权限查看此订单'
+      });
+    }
+
+    if (req.user.role === 'merchant' && order.product.merchant_id !== req.user.id) {
+      return res.status(403).json({
+        success: false,
+        message: '无权限查看此订单'
+      });
+    }
+
+    return res.json({
+      success: true,
+      data: { order }
+    });
+  } catch (error) {
+    console.error('获取订单详情错误:', error);
+    return res.status(500).json({
+      success: false,
+      message: '获取订单详情失败',
+      error: error.message
+    });
+  }
+};
+
+// 更新订单状态
+const updateOrderStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    if (!status) {
+      return res.status(400).json({
+        success: false,
+        message: '请提供订单状态'
+      });
+    }
+
+    const validStatuses = ['pending', 'confirmed', 'paid', 'completed', 'cancelled'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: '无效的订单状态'
+      });
+    }
+
+    const order = await Order.findByPk(id, {
+      include: [{ model: Product, as: 'product' }]
+    });
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: '订单不存在'
+      });
+    }
+
+    if (req.user.role === 'merchant' && order.product.merchant_id !== req.user.id) {
+      return res.status(403).json({
+        success: false,
+        message: '无权限操作此订单'
+      });
+    }
+
+    await order.update({ status });
+
+    return res.json({
+      success: true,
+      message: '订单状态更新成功',
+      data: { order }
+    });
+  } catch (error) {
+    console.error('更新订单状态错误:', error);
+    return res.status(500).json({
+      success: false,
+      message: '更新订单状态失败',
+      error: error.message
+    });
+  }
+};
+
+// 上传付款截图
+const uploadPaymentScreenshot = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { payment_screenshot, payment_filename } = req.body;
+
+    if (!payment_screenshot) {
+      return res.status(400).json({
+        success: false,
+        message: '请提供付款截图'
+      });
+    }
+
+    const order = await Order.findByPk(id);
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: '订单不存在'
+      });
+    }
+
+    if (order.user_id !== req.user.id && req.user.role !== 'admin') {
+      return res.status(403).json({
+        success: false,
+        message: '无权限操作此订单'
+      });
+    }
+
+    await order.update({
+      payment_screenshot,
+      payment_filename,
+      payment_status: 'uploaded'
+    });
+
+    return res.json({
+      success: true,
+      message: '付款截图上传成功',
+      data: { order }
+    });
+  } catch (error) {
+    console.error('上传付款截图错误:', error);
+    return res.status(500).json({
+      success: false,
+      message: '上传付款截图失败',
+      error: error.message
+    });
+  }
+};
+
+// 上传返回PDF
+const uploadReturnPdf = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { return_pdf, return_filename } = req.body;
+
+    if (!return_pdf) {
+      return res.status(400).json({
+        success: false,
+        message: '请提供返回PDF文件'
+      });
+    }
+
+    const order = await Order.findByPk(id, {
+      include: [{ model: Product, as: 'product' }]
+    });
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: '订单不存在'
+      });
+    }
+
+    if (req.user.role === 'merchant' && order.product.merchant_id !== req.user.id)
+      {
+        return res.status(403).json({
+          success: false,
+          message: '无权限操作此订单'
+        });
+      }
+
+    await order.update({
+      return_pdf,
+      return_filename
+    });
+
+    return res.json({
+      success: true,
+      message: '返回PDF上传成功',
+      data: { order }
+    });
+  } catch (error) {
+    console.error('上传返回PDF错误:', error);
+    return res.status(500).json({
+      success: false,
+      message: '上传返回PDF失败',
+      error: error.message
+    });
+  }
+};
+
+/**
+ * 获取商家订单列表
+ * @param {Object} req - 请求对象，包含商家用户信息
+ * @param {Object} res - 响应对象
+ * @returns {Promise<void>} - 返回商家订单列表
+ * @throws {Error} - 当数据库查询失败时抛出错误
+ */
+const getMerchantOrders = async (req, res) => {
+  try {
+    const { page = 1, limit = 10, status } = req.query;
+    const offset = (page - 1) * limit;
+    const whereClause = {};
+
+    // 获取商家的所有产品ID
+    const merchantProducts = await Product.findAll({
+      where: { merchant_id: req.user.id },
+      attributes: ['id']
+    });
+    const productIds = merchantProducts.map(p => p.id);
+
+    if (productIds.length === 0) {
+      return res.json({
+        success: true,
+        data: {
+          orders: [],
+          pagination: {
+            total: 0,
+            page: parseInt(page),
+            limit: parseInt(limit),
+            totalPages: 0
+          }
+        }
+      });
+    }
+
+    whereClause.product_id = { [Order.sequelize.Sequelize.Op.in]: productIds };
+    if (status) whereClause.status = status;
+
+    const { count, rows } = await Order.findAndCountAll({
+      where: whereClause,
+      include: [
+        { model: Product, as: 'product', attributes: ['id', 'title_zh', 'title_th'] },
+        { model: User, as: 'user', attributes: ['id', 'username', 'phone'] }
+      ],
+      limit: parseInt(limit),
+      offset: parseInt(offset),
+      order: [['createdAt', 'DESC']]
+    });
+
+    const orders = rows.map(order => ({
+      orderId: order.id,
+      orderNumber: order.order_number,
+      productId: order.product.id,
+      productTitle: order.product.title_zh,
+      travelDate: order.travel_date,
+      adultCount: order.adult_count,
+      childCount: order.child_count,
+      totalAmount: order.total_amount,
+      customerName: order.customer_info?.customer_name || order.user.username,
+      status: order.status,
+      createdAt: order.createdAt
+    }));
+
+    res.json({
+      success: true,
+      data: {
+        orders,
+        pagination: {
+          total: count,
+          page: parseInt(page),
+          limit: parseInt(limit),
+          totalPages: Math.ceil(count / limit)
+        }
+      }
+    });
+  } catch (error) {
+    console.error('获取商家订单错误:', error);
+    res.status(500).json({
+      success: false,
+      message: '获取商家订单失败',
+      error: error.message
+    });
+  }
+};
+
+module.exports = {
+  createOrder,
+  getOrders,
+  getOrderById,
+  updateOrderStatus,
+  uploadPaymentScreenshot,
+  uploadReturnFile: uploadReturnPdf,
+  getMerchantOrders
+};

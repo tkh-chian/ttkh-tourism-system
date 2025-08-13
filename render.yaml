@@ -4,9 +4,11 @@ services:
     env: node
     plan: free
     region: singapore
-    rootDir: backend
-    buildCommand: npm install
-    startCommand: npm start
+    # 对于新手，我们建议将rootDir留空
+    rootDir: ""
+    # 在项目根目录执行命令，通过cd进入backend目录
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm start
     envVars:
       - key: NODE_ENV
         value: production
@@ -22,11 +24,14 @@ services:
     env: static
     plan: free
     region: singapore
+    # 前端服务的rootDir设置为frontend目录
     rootDir: frontend
     buildCommand: npm install && npm run build
+    # 构建后的文件在build目录中
     staticPublishPath: build
     envVars:
       - key: REACT_APP_API_URL
+        # 部署后需要更新为实际的后端服务URL
         value: https://ttkh-tourism-backend.onrender.com
     routes:
       - type: rewrite

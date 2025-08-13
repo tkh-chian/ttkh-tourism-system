@@ -1,0 +1,27 @@
+{
+  "timestamp": "2025-08-10T06:23:10.698Z",
+  "rows": [
+    {
+      "id": "0c5eab24-9a22-457c-adb7-6bb901f3f98f",
+      "product_id": "5",
+      "travel_date": "2025-08-10T17:00:00.000Z",
+      "price": "100.00",
+      "total_stock": null,
+      "is_available": 1,
+      "createdAt": "2025-08-10T05:12:18.000Z",
+      "updatedAt": "2025-08-10T05:12:18.000Z",
+      "available_stock": null
+    },
+    {
+      "id": "2da8dfc4-95be-4bd2-9234-90910abf36ba",
+      "product_id": "5dba7779-7651-4c75-abdd-1e2681478279",
+      "travel_date": "2025-08-14T17:00:00.000Z",
+      "price": "1500.00",
+      "total_stock": null,
+      "is_available": 1,
+      "createdAt": "2025-08-10T05:21:43.000Z",
+      "updatedAt": "2025-08-10T05:21:43.000Z",
+      "available_stock": null
+    }
+  ]
+}

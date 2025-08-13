@@ -1,0 +1,7 @@
+打开首页 http://localhost:3000
+尝试打开登录页并登录（merchant@ttkh.com / merchant123）
+打开商家产品页 /merchant/products
+未找到产品详情链接，跳过详情页。
+打开商家订单页 /merchant/orders
+Trace 已生成: C:\Users\46405\txkafa8.7\ttkh-tourism-system\playwright\trace.zip
+可视化测试完成，截图已保存到 playwright 目录。

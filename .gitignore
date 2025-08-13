@@ -1,0 +1,37 @@
+# Dependencies
+node_modules/
+/backend/node_modules/
+/frontend/node_modules/
+
+# Logs
+*.log
+/backend/*.log
+/frontend/*.log
+
+# Environment files
+.env
+/backend/.env
+
+# Build outputs
+/build/
+/frontend/build/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Render build files
+.render-build-cache/
+
+# SQLite database file (for local development only)
+*.sqlite
+/backend/*.sqlite
+
+# Coverage reports
+coverage/

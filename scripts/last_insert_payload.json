@@ -1,0 +1,9 @@
+{
+  "id": "8a49c722-42e3-4570-ab63-be6853bdd727",
+  "username": "testuser_60",
+  "email": "testuser_60@example.com",
+  "password": "$2b$10$IEnuk1ishESAbvA8Aa1nUuUFwqjA1BOB69nT94GNFW0FVGnXhuLXa",
+  "role": "customer",
+  "status": "active",
+  "phone": "1234567890"
+}

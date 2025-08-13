@@ -1,0 +1,42 @@
+[
+  {
+    "timestamp": "2025-08-09T03:42:23.393Z",
+    "error": "Script error.",
+    "url": "http://localhost:3000/login",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) CodeBuddy/1.100.0 Chrome/132.0.6834.210 Electron/34.5.1 Safari/537.36",
+    "stack": "",
+    "id": 1754710943393
+  },
+  {
+    "timestamp": "2025-08-09T03:42:21.009Z",
+    "error": "Script error.",
+    "url": "http://localhost:3000/login",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) CodeBuddy/1.100.0 Chrome/132.0.6834.210 Electron/34.5.1 Safari/537.36",
+    "stack": "",
+    "id": 1754710941009
+  },
+  {
+    "timestamp": "2025-08-09T03:25:29.094Z",
+    "error": "Script error.",
+    "url": "http://localhost:3000/login",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) CodeBuddy/1.100.0 Chrome/132.0.6834.210 Electron/34.5.1 Safari/537.36",
+    "stack": "",
+    "id": 1754709929094
+  },
+  {
+    "timestamp": "2025-08-09T03:09:10.685Z",
+    "error": "Script error.",
+    "url": "http://localhost:3000/login",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) CodeBuddy/1.100.0 Chrome/132.0.6834.210 Electron/34.5.1 Safari/537.36",
+    "stack": "",
+    "id": 1754708950685
+  },
+  {
+    "timestamp": "2025-08-09T03:08:39.480Z",
+    "error": "Script error.",
+    "url": "http://localhost:3000/login",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) CodeBuddy/1.100.0 Chrome/132.0.6834.210 Electron/34.5.1 Safari/537.36",
+    "stack": "",
+    "id": 1754708919480
+  }
+]

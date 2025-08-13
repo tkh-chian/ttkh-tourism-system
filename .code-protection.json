@@ -1,0 +1,132 @@
+{
+  "version": "1.0.0",
+  "lastUpdated": "2025-08-11T15:52:59.018Z",
+  "protectedFiles": {
+    "frontend/src/components/OrderForm.tsx": {
+      "checksum": "4c8ce487dea76f8b40677319ecd2d93d",
+      "backupPath": "C:\\Users\\46405\\txkafa8.7\\ttkh-tourism-system\\.code-backups\\OrderForm.tsx.4c8ce487.2025-08-11T15-52-58-946Z.backup",
+      "protectedAt": "2025-08-11T15:52:58.950Z",
+      "reason": "核心功能文件 - 人工测试通过",
+      "status": "protected"
+    },
+    "frontend/src/pages/ProductDetail.tsx": {
+      "checksum": "6d4978b2283e1dc6b9461af51fe0d501",
+      "backupPath": "C:\\Users\\46405\\txkafa8.7\\ttkh-tourism-system\\.code-backups\\ProductDetail.tsx.6d4978b2.2025-08-11T15-52-58-953Z.backup",
+      "protectedAt": "2025-08-11T15:52:58.955Z",
+      "reason": "核心功能文件 - 人工测试通过",
+      "status": "protected"
+    },
+    "frontend/src/services/api.ts": {
+      "checksum": "2b73e84d7fc26fc0d0a366de364e710f",
+      "backupPath": "C:\\Users\\46405\\txkafa8.7\\ttkh-tourism-system\\.code-backups\\api.ts.2b73e84d.2025-08-11T15-52-58-958Z.backup",
+      "protectedAt": "2025-08-11T15:52:58.960Z",
+      "reason": "核心功能文件 - 人工测试通过",
+      "status": "protected"
+    },
+    "frontend/src/contexts/AuthContext.tsx": {
+      "checksum": "0b83c487096a66a095ddf3699dc379f3",
+      "backupPath": "C:\\Users\\46405\\txkafa8.7\\ttkh-tourism-system\\.code-backups\\AuthContext.tsx.0b83c487.2025-08-11T15-52-58-962Z.backup",
+      "protectedAt": "2025-08-11T15:52:58.963Z",
+      "reason": "核心功能文件 - 人工测试通过",
+      "status": "protected"
+    },
+    "frontend/src/pages/auth/Login.tsx": {
+      "checksum": "ac525d0c037459102d7745da11f4d263",
+      "backupPath": "C:\\Users\\46405\\txkafa8.7\\ttkh-tourism-system\\.code-backups\\Login.tsx.ac525d0c.2025-08-11T15-52-58-965Z.backup",
+      "protectedAt": "2025-08-11T15:52:58.967Z",
+      "reason": "核心功能文件 - 人工测试通过",
+      "status": "protected"
+    },
+    "frontend/src/pages/auth/Register.tsx": {
+      "checksum": "fee8440bbf71bd95154225f440fbc121",
+      "backupPath": "C:\\Users\\46405\\txkafa8.7\\ttkh-tourism-system\\.code-backups\\Register.tsx.fee8440b.2025-08-11T15-52-58-969Z.backup",
+      "protectedAt": "2025-08-11T15:52:58.970Z",
+      "reason": "核心功能文件 - 人工测试通过",
+      "status": "protected"
+    },
+    "frontend/src/App.tsx": {
+      "checksum": "b8a011f170c8db5866095b794b87fe12",
+      "backupPath": "C:\\Users\\46405\\txkafa8.7\\ttkh-tourism-system\\.code-backups\\App.tsx.b8a011f1.2025-08-11T15-52-58-972Z.backup",
+      "protectedAt": "2025-08-11T15:52:58.973Z",
+      "reason": "核心功能文件 - 人工测试通过",
+      "status": "protected"
+    },
+    "backend/simple-server-fixed.js": {
+      "checksum": "d1e47d9b8f4db6b7b4c3854dafd4800f",
+      "backupPath": "C:\\Users\\46405\\txkafa8.7\\ttkh-tourism-system\\.code-backups\\simple-server-fixed.js.d1e47d9b.2025-08-11T15-52-58-977Z.backup",
+      "protectedAt": "2025-08-11T15:52:58.978Z",
+      "reason": "核心功能文件 - 人工测试通过",
+      "status": "protected"
+    },
+    "backend/controllers/authController.js": {
+      "checksum": "b06a35a8d2116e3138a7370bb68c3628",
+      "backupPath": "C:\\Users\\46405\\txkafa8.7\\ttkh-tourism-system\\.code-backups\\authController.js.b06a35a8.2025-08-11T15-52-58-980Z.backup",
+      "protectedAt": "2025-08-11T15:52:58.982Z",
+      "reason": "核心功能文件 - 人工测试通过",
+      "status": "protected"
+    },
+    "backend/controllers/orderController.js": {
+      "checksum": "ec55262c60ce8193a1a4841498ec1933",
+      "backupPath": "C:\\Users\\46405\\txkafa8.7\\ttkh-tourism-system\\.code-backups\\orderController.js.ec55262c.2025-08-11T15-52-58-984Z.backup",
+      "protectedAt": "2025-08-11T15:52:58.986Z",
+      "reason": "核心功能文件 - 人工测试通过",
+      "status": "protected"
+    },
+    "backend/controllers/productController.js": {
+      "checksum": "217ea93efab8a9658e3d59ccee70aa8f",
+      "backupPath": "C:\\Users\\46405\\txkafa8.7\\ttkh-tourism-system\\.code-backups\\productController.js.217ea93e.2025-08-11T15-52-58-991Z.backup",
+      "protectedAt": "2025-08-11T15:52:58.992Z",
+      "reason": "核心功能文件 - 人工测试通过",
+      "status": "protected"
+    },
+    "backend/routes/auth.js": {
+      "checksum": "c6e55857042d4671a22386ebdf6c8455",
+      "backupPath": "C:\\Users\\46405\\txkafa8.7\\ttkh-tourism-system\\.code-backups\\auth.js.c6e55857.2025-08-11T15-52-58-995Z.backup",
+      "protectedAt": "2025-08-11T15:52:58.996Z",
+      "reason": "核心功能文件 - 人工测试通过",
+      "status": "protected"
+    },
+    "backend/routes/orders.js": {
+      "checksum": "63c49664098a0a0f77ec4f6eeee10b7f",
+      "backupPath": "C:\\Users\\46405\\txkafa8.7\\ttkh-tourism-system\\.code-backups\\orders.js.63c49664.2025-08-11T15-52-58-999Z.backup",
+      "protectedAt": "2025-08-11T15:52:59.001Z",
+      "reason": "核心功能文件 - 人工测试通过",
+      "status": "protected"
+    },
+    "backend/routes/products.js": {
+      "checksum": "da9e4578fff659f6790a7046afedbe2b",
+      "backupPath": "C:\\Users\\46405\\txkafa8.7\\ttkh-tourism-system\\.code-backups\\products.js.da9e4578.2025-08-11T15-52-59-003Z.backup",
+      "protectedAt": "2025-08-11T15:52:59.004Z",
+      "reason": "核心功能文件 - 人工测试通过",
+      "status": "protected"
+    },
+    "backend/models/User.js": {
+      "checksum": "4dc0b80fbb9ad7f2c86ba45e891883be",
+      "backupPath": "C:\\Users\\46405\\txkafa8.7\\ttkh-tourism-system\\.code-backups\\User.js.4dc0b80f.2025-08-11T15-52-59-006Z.backup",
+      "protectedAt": "2025-08-11T15:52:59.007Z",
+      "reason": "核心功能文件 - 人工测试通过",
+      "status": "protected"
+    },
+    "backend/models/Product.js": {
+      "checksum": "ab0dac3bdf0c623ce89d5aedf51ca496",
+      "backupPath": "C:\\Users\\46405\\txkafa8.7\\ttkh-tourism-system\\.code-backups\\Product.js.ab0dac3b.2025-08-11T15-52-59-009Z.backup",
+      "protectedAt": "2025-08-11T15:52:59.011Z",
+      "reason": "核心功能文件 - 人工测试通过",
+      "status": "protected"
+    },
+    "backend/models/Order.js": {
+      "checksum": "52ba72e661f244567a7a4831b7d1c349",
+      "backupPath": "C:\\Users\\46405\\txkafa8.7\\ttkh-tourism-system\\.code-backups\\Order.js.52ba72e6.2025-08-11T15-52-59-013Z.backup",
+      "protectedAt": "2025-08-11T15:52:59.015Z",
+      "reason": "核心功能文件 - 人工测试通过",
+      "status": "protected"
+    },
+    "backend/models/PriceSchedule.js": {
+      "checksum": "f060297d59667953201f4e3fd11b2e4b",
+      "backupPath": "C:\\Users\\46405\\txkafa8.7\\ttkh-tourism-system\\.code-backups\\PriceSchedule.js.f060297d.2025-08-11T15-52-59-017Z.backup",
+      "protectedAt": "2025-08-11T15:52:59.018Z",
+      "reason": "核心功能文件 - 人工测试通过",
+      "status": "protected"
+    }
+  }
+}

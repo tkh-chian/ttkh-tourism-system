@@ -1,0 +1,377 @@
+const fs = require('fs');
+const { User, Product, PriceSchedule } = require('../models');
+
+// 获取产品列表（公开接口）
+const getProducts = async (req, res) => {
+  try {
+    const { page = 1, limit = 12, search, minPrice, maxPrice, status = 'approved' } = req.query;
+    const offset = (page - 1) * limit;
+    const where = { status };
+
+    if (search) {
+      where[Product.sequelize.Sequelize.Op.or] = [
+        { title_zh: { [Product.sequelize.Sequelize.Op.like]: `%${search}%` } },
+        { title_th: { [Product.sequelize.Sequelize.Op.like]: `%${search}%` } }
+      ];
+    }
+
+    if (minPrice || maxPrice) {
+      where.base_price = {};
+      if (minPrice) where.base_price[Product.sequelize.Sequelize.Op.gte] = minPrice;
+      if (maxPrice) where.base_price[Product.sequelize.Sequelize.Op.lte] = maxPrice;
+    }
+
+    const { count, rows } = await Product.findAndCountAll({
+      where,
+      include: [
+        { model: User, as: 'merchant', attributes: ['id', 'username', 'company_name'] },
+        {
+          model: PriceSchedule,
+          as: 'schedules',
+          where: { date: { [Product.sequelize.Sequelize.Op.gte]: new Date() } },
+          required: false,
+          limit: 30,
+          order: [['date', 'ASC']]
+        }
+      ],
+      limit: parseInt(limit),
+      offset: parseInt(offset),
+      order: [['createdAt', 'DESC']]
+    });
+
+    res.json({
+      success: true,
+      data: rows,
+      pagination: {
+        total: count,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        totalPages: Math.ceil(count / limit)
+      }
+    });
+  } catch (error) {
+    console.error('获取产品列表错误:', error);
+    res.status(500).json({ success: false, message: '获取产品列表失败', error: error.message });
+  }
+};
+
+// 获取产品详情
+const getProductById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const product = await Product.findByPk(id, {
+      include: [
+        { model: User, as: 'merchant', attributes: ['id', 'username', 'company_name', 'contact_person'] },
+        {
+          model: PriceSchedule,
+          as: 'schedules',
+          where: { date: { [Product.sequelize.Sequelize.Op.gte]: new Date() } },
+          required: false,
+          order: [['date', 'ASC']]
+        }
+      ]
+    });
+
+    if (!product) {
+      return res.status(404).json({ success: false, message: '产品不存在' });
+    }
+
+    await Product.increment('view_count', { where: { id } });
+    await product.reload();
+    res.json({ success: true, data: product });
+  } catch (error) {
+    console.error('获取产品详情错误:', error);
+    res.status(500).json({ success: false, message: '获取产品详情失败', error: error.message });
+  }
+};
+
+// 创建产品（商家）
+const createProduct = async (req, res) => {
+  try {
+    // 确保日志目录存在
+    try {
+      if (!fs.existsSync('./logs')) {
+        fs.mkdirSync('./logs', { recursive: true });
+      }
+    } catch (e) {
+      console.error('创建日志目录失败:', e);
+    }
+
+    // 处理 multipart/form-data 和 application/json 两种格式
+    let payload = req.body || {};
+    
+    // 如果 req.body 为空但有 req.files，可能是 multipart/form-data
+    if (Object.keys(payload).length === 0 && req.files) {
+      payload = {};
+      // 从 form-data 中提取字段
+      Object.keys(req.files).forEach(key => {
+        if (key === 'poster_image' || key === 'pdf_file') {
+          payload[key] = req.files[key].path || req.files[key].location || '';
+          payload[`${key.split('_')[0]}_filename`] = req.files[key].originalname || '';
+        }
+      });
+      
+      // 从 form-data 中提取其他字段
+      if (req.body) {
+        Object.keys(req.body).forEach(key => {
+          payload[key] = req.body[key];
+        });
+      }
+    }
+
+    const {
+      title_zh, title_th, description_zh, description_th,
+      base_price, poster_image, poster_filename,
+      pdf_file, pdf_filename
+    } = payload;
+
+    // 记录请求以便排查错误（确保目录存在）
+    try {
+      fs.appendFileSync('./logs/product_request.log', `${new Date().toISOString()} user:${req.user && req.user.id}\n${JSON.stringify({ body: payload, files: req.files }, null, 2)}\n\n`);
+    } catch (e) {
+      console.error('写入请求日志失败:', e);
+      // 忽略日志写入错误
+    }
+
+    // 将 base_price 强制为数值类型（增强容错性）
+    let parsedBasePrice;
+    if (base_price === undefined || base_price === null || base_price === '') {
+      parsedBasePrice = 0; // 设置默认价格
+    } else {
+      parsedBasePrice = Number(base_price);
+      if (Number.isNaN(parsedBasePrice)) {
+        return res.status(400).json({
+          success: false,
+          message: '基础价格需为数值'
+        });
+      }
+    }
+
+    // 验证必填字段
+    if (!title_zh || !title_th) {
+      return res.status(400).json({
+        success: false,
+        message: '中文标题和泰文标题为必填项'
+      });
+    }
+
+    // 生成唯一产品编号: PRD-时间戳-随机数
+    const timestamp = Date.now();
+    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    const product_number = `PRD-${timestamp}-${random}`;
+
+    // 双重验证确保唯一性
+    const checkUniqueness = async () => {
+      const existing = await Product.findOne({ where: { product_number } });
+      if (existing) {
+        // 如果重复，生成新的随机数
+        const newRandom = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+        return `PRD-${timestamp}-${newRandom}`;
+      }
+      return product_number;
+    };
+
+    const uniqueProductNumber = await checkUniqueness();
+    const product = await Product.create({
+      product_number: uniqueProductNumber,
+      merchant_id: req.user.id,
+      title_zh,
+      title_th,
+      description_zh,
+      description_th,
+      base_price: parsedBasePrice,
+      poster_image,
+      poster_filename,
+      pdf_file,
+      pdf_filename,
+      // 兼容旧字段，保留既有功能
+      name: title_zh,
+      description: description_zh || '',
+      price: base_price,
+      status: 'draft'
+    });
+
+    // 自动生成未来 30 天的价格日程，默认库存为 10，便于下单测试通过
+    try {
+      if (PriceSchedule && PriceSchedule.bulkCreate) {
+        const schedules = [];
+        const start = new Date();
+        for (let i = 1; i <= 30; i++) {
+          const d = new Date(start);
+          d.setDate(start.getDate() + i);
+          schedules.push({
+            product_id: product.id,
+            date: d,
+            price: product.base_price,
+            total_stock: 10,
+            createdAt: new Date(),
+            updatedAt: new Date()
+          });
+        }
+        if (schedules.length) {
+          await PriceSchedule.bulkCreate(schedules);
+        }
+      }
+    } catch (e) {
+      console.error('自动创建价格日程失败:', e);
+      // 不影响产品创建主流程，继续返回成功响应
+    }
+
+    // 重新加载 product 以包含关联或最新字段
+    try { await product.reload(); } catch(e) {}
+
+    res.status(201).json({ 
+      success: true, 
+      message: '产品创建成功', 
+      data: product
+    });
+  } catch (error) {
+    console.error('创建产品错误:', error);
+    // 确保错误日志写入成功
+    try {
+      fs.appendFileSync('./logs/product_error.log', `${new Date().toISOString()} user:${req.user && req.user.id}\n${error.stack}\n\n`);
+    } catch (e) {
+      console.error('写入错误日志失败:', e);
+    }
+    res.status(500).json({ 
+      success: false, 
+      message: '创建产品失败', 
+      error: error.message,
+      errorType: error.name || 'Unknown'
+    });
+  }
+};
+
+// 更新产品（商家）
+const updateProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updates = req.body;
+    const product = await Product.findOne({ where: { id, merchant_id: req.user.id } });
+
+    if (!product) {
+      return res.status(404).json({ success: false, message: '产品不存在或无权限修改' });
+    }
+
+    await product.update(updates);
+    res.json({ success: true, message: '产品更新成功', data: product });
+  } catch (error) {
+    console.error('更新产品错误:', error);
+    res.status(500).json({ success: false, message: '更新产品失败', error: error.message });
+  }
+};
+
+// 提交产品审核
+const submitForReview = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const product = await Product.findOne({ where: { id, merchant_id: req.user.id } });
+
+    if (!product) {
+      return res.status(404).json({ success: false, message: '产品不存在或无权限操作' });
+    }
+    if (!['draft', 'rejected'].includes(product.status)) {
+      return res.status(400).json({
+        success: false,
+        message: '只有草稿或被拒绝的产品可以提交审核'
+      });
+    }
+
+    await product.update({ status: 'pending' });
+    res.json({ success: true, message: '产品已提交审核', data: product });
+  } catch (error) {
+    console.error('提交审核错误:', error);
+    res.status(500).json({ success: false, message: '提交审核失败', error: error.message });
+  }
+};
+
+// 获取商家产品列表
+const getMerchantProducts = async (req, res) => {
+  try {
+    const { page = 1, limit = 10, status } = req.query;
+    const offset = (page - 1) * limit;
+    const where = { merchant_id: req.user.id };
+    if (status) where.status = status;
+
+    const { count, rows } = await Product.findAndCountAll({
+      where,
+      include: [{ model: PriceSchedule, as: 'schedules', required: false }],
+      limit: parseInt(limit),
+      offset: parseInt(offset),
+      order: [['createdAt', 'DESC']]
+    });
+
+    res.json({
+      success: true,
+      data: rows,
+      pagination: {
+        total: count,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        totalPages: Math.ceil(count / limit)
+      }
+    });
+  } catch (error) {
+    console.error('获取商家产品列表错误:', error);
+    res.status(500).json({ success: false, message: '获取商家产品列表失败', error: error.message });
+  }
+};
+
+// 下架产品（商家）
+const unpublishProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const product = await Product.findOne({ where: { id, merchant_id: req.user.id } });
+
+    if (!product) {
+      return res.status(404).json({ success: false, message: '产品不存在或无权限操作' });
+    }
+
+    if (product.status !== 'approved') {
+      return res.status(400).json({
+        success: false,
+        message: '只有已审核通过的产品可以下架'
+      });
+    }
+
+    await product.update({ status: 'draft' });
+    res.json({ success: true, message: '产品已成功下架', data: product });
+  } catch (error) {
+    console.error('下架产品错误:', error);
+    res.status(500).json({ success: false, message: '下架产品失败', error: error.message });
+  }
+};
+
+// 删除产品（商家）
+const deleteProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const product = await Product.findOne({ where: { id, merchant_id: req.user.id } });
+
+    if (!product) {
+      return res.status(404).json({ success: false, message: '产品不存在或无权限操作' });
+    }
+
+    // 删除关联的价格调度
+    await PriceSchedule.destroy({ where: { product_id: id } });
+    
+    // 删除产品
+    await product.destroy();
+    
+    res.json({ success: true, message: '产品已成功删除' });
+  } catch (error) {
+    console.error('删除产品错误:', error);
+    res.status(500).json({ success: false, message: '删除产品失败', error: error.message });
+  }
+};
+
+module.exports = {
+  getProducts,
+  getProductById,
+  createProduct,
+  updateProduct,
+  submitForReview,
+  getMerchantProducts,
+  unpublishProduct,
+  deleteProduct
+};

@@ -1,0 +1,112 @@
+{
+  "timestamp": "2025-08-11T05:28:25.604Z",
+  "testResults": [
+    {
+      "timestamp": "2025/8/11 12:27:55",
+      "type": "info",
+      "message": "🚀 开始端对端测试流程"
+    },
+    {
+      "timestamp": "2025/8/11 12:27:55",
+      "type": "info",
+      "message": "已清理端口 3001 上的进程"
+    },
+    {
+      "timestamp": "2025/8/11 12:27:56",
+      "type": "info",
+      "message": "已清理端口 3000 上的进程"
+    },
+    {
+      "timestamp": "2025/8/11 12:27:57",
+      "type": "info",
+      "message": "初始化数据库..."
+    },
+    {
+      "timestamp": "2025/8/11 12:27:57",
+      "type": "success",
+      "message": "数据库初始化成功"
+    },
+    {
+      "timestamp": "2025/8/11 12:27:57",
+      "type": "info",
+      "message": "正在启动后端服务器..."
+    },
+    {
+      "timestamp": "2025/8/11 12:27:57",
+      "type": "success",
+      "message": "后端服务器启动成功"
+    },
+    {
+      "timestamp": "2025/8/11 12:28:00",
+      "type": "info",
+      "message": "开始测试后端API..."
+    },
+    {
+      "timestamp": "2025/8/11 12:28:00",
+      "type": "success",
+      "message": "健康检查通过"
+    },
+    {
+      "timestamp": "2025/8/11 12:28:00",
+      "type": "success",
+      "message": "管理员登录成功"
+    },
+    {
+      "timestamp": "2025/8/11 12:28:00",
+      "type": "success",
+      "message": "获取产品列表成功，共 1 个产品"
+    },
+    {
+      "timestamp": "2025/8/11 12:28:00",
+      "type": "success",
+      "message": "获取商家列表成功，共 10 个商家"
+    },
+    {
+      "timestamp": "2025/8/11 12:28:00",
+      "type": "info",
+      "message": "正在启动前端服务器..."
+    },
+    {
+      "timestamp": "2025/8/11 12:28:20",
+      "type": "success",
+      "message": "前端服务器启动成功"
+    },
+    {
+      "timestamp": "2025/8/11 12:28:25",
+      "type": "info",
+      "message": "测试前端访问..."
+    },
+    {
+      "timestamp": "2025/8/11 12:28:25",
+      "type": "success",
+      "message": "前端页面访问成功"
+    }
+  ],
+  "summary": {
+    "total": 16,
+    "success": 8,
+    "errors": 0
+  },
+  "urls": {
+    "frontend": "http://localhost:3000",
+    "backend": "http://localhost:3001"
+  },
+  "testAccounts": {
+    "admin": {
+      "email": "admin@ttkh.com",
+      "password": "admin123"
+    },
+    "merchant": {
+      "email": "merchant@test.com",
+      "password": "123456"
+    },
+    "agent": {
+      "email": "agent@test.com",
+      "password": "123456"
+    },
+    "customer": {
+      "email": "user@test.com",
+      "password": "123456"
+    }
+  }
+}

@@ -1,0 +1,1 @@
+SQL:\nSELECT id, username, createdAt, updatedAt FROM users WHERE id = ?\nPARAMS:\n["8a49c722-42e3-4570-ab63-be6853bdd727"]\n
